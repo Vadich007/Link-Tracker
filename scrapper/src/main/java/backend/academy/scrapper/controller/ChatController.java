@@ -1,0 +1,34 @@
+package backend.academy.scrapper.controller;
+
+import backend.academy.scrapper.repository.chat.ChatRepository;
+import jakarta.validation.constraints.Positive;
+import java.util.NoSuchElementException;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/v1/tg-chat/{id}")
+@AllArgsConstructor
+@Slf4j
+public class ChatController {
+    private final ChatRepository repository;
+
+    @PostMapping
+    public void addChat(@PathVariable @Positive long id) {
+        if (repository.containChat(id)) throw new NoSuchElementException("Чат с таким id уже зарегистрирован");
+        repository.addChat(id);
+        log.info("Authorization of a user with an id {}", id);
+    }
+
+    @DeleteMapping
+    public void deleteChat(@PathVariable @Positive long id) {
+        if (!repository.containChat(id)) throw new IllegalArgumentException("Чат не существует");
+        repository.deleteChat(id);
+        log.info("Deleting a user with an id {}", id);
+    }
+}

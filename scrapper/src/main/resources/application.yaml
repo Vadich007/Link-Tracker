@@ -1,0 +1,45 @@
+app:
+  github-token: ${GITHUB_TOKEN} # env variable
+  stackoverflow:
+    key: ${SO_TOKEN_KEY}
+    access-token: ${SO_ACCESS_TOKEN}
+  interval: 10000
+  access-type: orm
+  limit: 100
+
+api:
+  github:
+    repos-events: https://api.github.com/repos/{owner}/{repos}/events
+  stackoverflow:
+    timeline: https://api.stackexchange.com/2.3/questions/{question}/timeline?site=stackoverflow&order=desc&key={key}
+    posts: https://api.stackexchange.com/2.3/posts/{post}?site=stackoverflow&filter=withbody&key={key}
+  bot:
+    update: http://localhost:8080/api/v1/updates
+
+db:
+  url: jdbc:postgresql://localhost:5432/link_tracker_bot
+  username: ${DB_USER} # env variable
+  password: ${DB_PASSWORD} # env variable
+
+
+spring:
+  application:
+    name: Scrapper
+  datasource:
+    url: jdbc:postgresql://localhost:5432/link_tracker_bot
+    username: ${DB_USER} # env variable
+    password: ${DB_PASSWORD} # env variable
+  liquibase:
+    enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+server:
+  port: 8081
+
+springdoc:
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui

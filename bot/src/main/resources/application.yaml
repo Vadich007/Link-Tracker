@@ -1,0 +1,35 @@
+app:
+  telegram-token: ${TELEGRAM_TOKEN} # env variable
+  access-type: orm
+
+api:
+  scrapper:
+    links: http://localhost:8081/api/v1/links
+    tg-chat: http://localhost:8081/api/v1/tg-chat/{id}
+
+db:
+  url: jdbc:postgresql://localhost:5432/link_tracker_bot
+  username: ${DB_USER} # env variable
+  password: ${DB_PASSWORD} # env variable
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/link_tracker_bot
+    username: ${DB_USER} # env variable
+    password: ${DB_PASSWORD} # env variable
+  application:
+    name: Bot
+  liquibase:
+    enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+server:
+  port: 8080
+
+springdoc:
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui
