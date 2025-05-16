@@ -4,7 +4,7 @@ import backend.academy.bot.repository.UserRepository;
 import backend.academy.bot.schemas.models.UserStates;
 import backend.academy.bot.schemas.requests.RemoveLinkRequest;
 import backend.academy.bot.service.BotCommands;
-import backend.academy.bot.service.ScrapperClient;
+import backend.academy.bot.service.scrapper.ScrapperService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
@@ -14,7 +14,7 @@ import org.springframework.web.client.HttpServerErrorException;
 @AllArgsConstructor
 public class UntrackHandler implements CommandHandler {
     private UserRepository userRepository;
-    private ScrapperClient scrapperClient;
+    private ScrapperService scrapperService;
 
     @Override
     public String command() {
@@ -31,7 +31,7 @@ public class UntrackHandler implements CommandHandler {
             case UserStates.WAIT_UNTRACK_LINK:
                 userRepository.updateState(chatId, UserStates.FREE);
                 try {
-                    scrapperClient.untrackLink(chatId, new RemoveLinkRequest(message));
+                    scrapperService.untrackLink(chatId, new RemoveLinkRequest(message));
                     return "Ссылка удалена.";
                 } catch (HttpClientErrorException e) {
                     return "Некорректные параметры запроса.";

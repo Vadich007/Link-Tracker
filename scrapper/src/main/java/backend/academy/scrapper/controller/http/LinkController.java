@@ -1,4 +1,4 @@
-package backend.academy.scrapper.controller;
+package backend.academy.scrapper.controller.http;
 
 import backend.academy.scrapper.repository.chat.ChatRepository;
 import backend.academy.scrapper.repository.link.LinkRepository;
@@ -15,6 +15,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/links")
 @AllArgsConstructor
 @Slf4j
+@ConditionalOnProperty(name = "app.message-transport", havingValue = "http")
 public class LinkController {
     private final ChatRepository chatRepository;
     private final LinkRepository linkRepository;

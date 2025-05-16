@@ -5,6 +5,7 @@ import backend.academy.scrapper.schemas.requests.LinkUpdateRequest;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -12,6 +13,7 @@ import org.springframework.web.client.RestTemplate;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@ConditionalOnProperty(name = "app.message-transport", havingValue = "http")
 public class HttpBotService implements BotService {
     private final RestTemplate restTemplate = new RestTemplate();
     private long uniqueId = 0;

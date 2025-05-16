@@ -4,7 +4,7 @@ import backend.academy.bot.repository.UserRepository;
 import backend.academy.bot.schemas.models.UserStates;
 import backend.academy.bot.schemas.responses.ApiErrorResponse;
 import backend.academy.bot.service.BotCommands;
-import backend.academy.bot.service.ScrapperClient;
+import backend.academy.bot.service.scrapper.ScrapperService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
@@ -17,7 +17,7 @@ import org.springframework.web.client.HttpServerErrorException;
 @AllArgsConstructor
 public class TrackHandler implements CommandHandler {
     private final UserRepository userRepository;
-    private final ScrapperClient scrapperClient;
+    private final ScrapperService scrapperService;
 
     @Override
     public String command() {
@@ -50,7 +50,7 @@ public class TrackHandler implements CommandHandler {
                 if (!message.equals(rejectionLine) && !message.isEmpty())
                     userRepository.addFilters(chatId, Arrays.asList(message.split(" ")));
                 try {
-                    scrapperClient.trackLink(chatId, userRepository.getAddLinkRequest(chatId));
+                    scrapperService.trackLink(chatId, userRepository.getAddLinkRequest(chatId));
                     userRepository.deleteAddLinkRequest(chatId);
                     return "Ссылка добавлена.";
                 } catch (HttpClientErrorException e) {

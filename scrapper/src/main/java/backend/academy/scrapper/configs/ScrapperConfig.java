@@ -11,6 +11,7 @@ public record ScrapperConfig(
         StackOverflowCredentials stackOverflow,
         Integer interval,
         @NotEmpty String accessType,
-        Integer limit) {
+        Integer limit,
+        @NotEmpty String messageTransport) {
     public record StackOverflowCredentials(@NotEmpty String key, @NotEmpty String accessToken) {}
 }

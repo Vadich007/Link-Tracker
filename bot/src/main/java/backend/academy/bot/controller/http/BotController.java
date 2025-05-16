@@ -1,10 +1,11 @@
-package backend.academy.bot.controller;
+package backend.academy.bot.controller.http;
 
 import backend.academy.bot.schemas.responses.LinkUpdate;
 import backend.academy.bot.service.NotificationService;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/updates")
 @Slf4j
+@ConditionalOnProperty(name = "app.message-transport", havingValue = "http")
 public class BotController {
     private NotificationService notificationService;
 

@@ -28,7 +28,7 @@ public class TelegramService {
         listenMessage();
     }
 
-    public void listenMessage() {
+    private void listenMessage() {
         telegramBot.setUpdatesListener(updates -> {
             for (Update update : updates) {
                 long chatId = update.message().chat().id();

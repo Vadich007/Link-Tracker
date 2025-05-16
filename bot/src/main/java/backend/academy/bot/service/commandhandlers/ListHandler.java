@@ -3,8 +3,8 @@ package backend.academy.bot.service.commandhandlers;
 import backend.academy.bot.schemas.models.Link;
 import backend.academy.bot.schemas.responses.ApiErrorResponse;
 import backend.academy.bot.service.BotCommands;
-import backend.academy.bot.service.ScrapperClient;
 import java.util.List;
+import backend.academy.bot.service.scrapper.ScrapperService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -14,7 +14,7 @@ import org.springframework.web.client.HttpServerErrorException;
 @AllArgsConstructor
 @Component
 public class ListHandler implements CommandHandler {
-    private ScrapperClient scrapperClient;
+    private ScrapperService scrapperService;
 
     @Override
     public String command() {
@@ -25,7 +25,7 @@ public class ListHandler implements CommandHandler {
     public String handle(Long chatId, String message) {
         List<Link> links;
         try {
-            links = scrapperClient.listLink(chatId);
+            links = scrapperService.listLink(chatId);
         } catch (HttpClientErrorException e) {
             ApiErrorResponse response = e.getResponseBodyAs(ApiErrorResponse.class);
             if (response != null

@@ -3,7 +3,7 @@ package backend.academy.bot.service.commandhandlers;
 import backend.academy.bot.repository.UserRepository;
 import backend.academy.bot.schemas.responses.ApiErrorResponse;
 import backend.academy.bot.service.BotCommands;
-import backend.academy.bot.service.ScrapperClient;
+import backend.academy.bot.service.scrapper.ScrapperService;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -15,7 +15,7 @@ import org.springframework.web.client.ResourceAccessException;
 @Component
 @AllArgsConstructor
 public class StartHandler implements CommandHandler {
-    private ScrapperClient scrapperClient;
+    private ScrapperService scrapperService;
     private UserRepository userRepository;
 
     @Override
@@ -26,7 +26,7 @@ public class StartHandler implements CommandHandler {
     @Override
     public String handle(Long chatId, String message) {
         try {
-            scrapperClient.registrationChat(chatId);
+            scrapperService.registrationChat(chatId);
             userRepository.addUser(chatId);
             return "Вы успешно зарегистрированы.";
         } catch (HttpClientErrorException e) {
