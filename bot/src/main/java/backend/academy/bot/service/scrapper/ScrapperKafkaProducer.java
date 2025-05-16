@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 @Service
 @Slf4j
+@ConditionalOnProperty(name = "app.message-transport", havingValue = "kafka")
 public class ScrapperKafkaProducer implements ScrapperService {
     private final KafkaTemplate<Long, String> kafkaTemplate;
     private final KafkaConfig config;

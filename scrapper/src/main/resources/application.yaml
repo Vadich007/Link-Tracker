@@ -3,7 +3,7 @@ app:
   stackoverflow:
     key: ${SO_TOKEN_KEY}
     access-token: ${SO_ACCESS_TOKEN}
-  interval: 10000000
+  interval: 10000
   access-type: orm
   limit: 100
   message-transport: http
