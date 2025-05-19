@@ -6,7 +6,7 @@ app:
   interval: 10000000
   access-type: orm
   limit: 100
-  message-transport: kafka
+  message-transport: http
 
 api:
   github:

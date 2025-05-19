@@ -1,7 +1,7 @@
 app:
   telegram-token: ${TELEGRAM_TOKEN} # env variable
   access-type: orm
-  message-transport: kafka
+  message-transport: http
 
 kafka:
   topic:
