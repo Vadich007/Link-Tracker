@@ -8,7 +8,6 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
-import java.util.NoSuchElementException;
 
 @Component
 @AllArgsConstructor
@@ -19,7 +18,7 @@ public class ChatConsumer {
 
     @KafkaListener(topics = "${kafka.topic.chats}")
     public void chatListen(@Header(KafkaHeaders.RECEIVED_KEY) Long id) {
-        if (repository.containChat(id)) throw new NoSuchElementException("Чат с таким id уже зарегистрирован");
+        if (repository.containChat(id)) return;
         repository.addChat(id);
         log.info("Authorization of a user with an id {}", id);
     }

@@ -1,5 +1,3 @@
-![Build](https://github.com/central-university-dev/backend-academy-2025-spring-template/actions/workflows/build.yaml/badge.svg)
-
 # Link Tracker
 
 <!-- этот файл можно и нужно менять -->
@@ -69,8 +67,6 @@ docker-compose up -d
 ``
 docker-compose up -d
 ``
-
-При использовании Kafka необходимо предварительно создать топики: chats, remove-link, add-link, get-links, events
 
 Для удобства добавлены Kafka Ui и PgAdmin, подключиться к ним можно через
 ``http://localhost:8085/`` и ``http://localhost:5050/`` соответственно

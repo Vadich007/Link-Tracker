@@ -22,6 +22,8 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_MIN_IN_SYNC_REPLICAS: 1
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_CREATE_TOPICS: "chats:1:1,links:1:1,list-links:1:1,events:1:1"
     depends_on:
       - zookeeper
 

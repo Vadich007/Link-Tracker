@@ -1,6 +1,6 @@
 package backend.academy.bot.controller.http;
 
-import backend.academy.bot.schemas.responses.LinkUpdate;
+import backend.academy.bot.schemas.responses.LinkUpdateResponse;
 import backend.academy.bot.service.NotificationService;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -21,12 +21,12 @@ public class BotController {
     private NotificationService notificationService;
 
     @PostMapping
-    public void updateLink(@NotNull @RequestBody @Validated LinkUpdate linkUpdate) {
-        log.info("Link update received {} for users {}", linkUpdate.url(), linkUpdate.tgChatIds());
-        String message = "Новое обновление\n" + linkUpdate.url() + "\n" + linkUpdate.description();
-        for (Long chat : linkUpdate.tgChatIds()) {
+    public void updateLink(@NotNull @RequestBody @Validated LinkUpdateResponse linkUpdateResponse) {
+        log.info("Link update received {} for users {}", linkUpdateResponse.url(), linkUpdateResponse.tgChatIds());
+        String message = "Новое обновление\n" + linkUpdateResponse.url() + "\n" + linkUpdateResponse.description();
+        for (Long chat : linkUpdateResponse.tgChatIds()) {
             notificationService.notifyUser(chat, message);
-            log.info("Notification of link update {} sent for the user {}", linkUpdate.url(), chat);
+            log.info("Notification of link update {} sent for the user {}", linkUpdateResponse.url(), chat);
         }
     }
 }

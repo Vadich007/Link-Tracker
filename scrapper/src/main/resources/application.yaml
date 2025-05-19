@@ -3,10 +3,10 @@ app:
   stackoverflow:
     key: ${SO_TOKEN_KEY}
     access-token: ${SO_ACCESS_TOKEN}
-  interval: 10000
+  interval: 10000000
   access-type: orm
   limit: 100
-  message-transport: http
+  message-transport: kafka
 
 api:
   github:
@@ -25,9 +25,8 @@ db:
 kafka:
   topic:
     chats: chats
-    remove-link: remove-link
-    add-link: add-link
-    list-links: get-links
+    links: links
+    list-links: list-links
     events: events
 
 spring:
@@ -47,11 +46,6 @@ spring:
     bootstrap-servers: localhost:19092
     consumer:
       group-id: scrapper-consumer-group
-      key-deserializer: org.apache.kafka.common.serialization.LongDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.LongSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
 server:
   port: 8081

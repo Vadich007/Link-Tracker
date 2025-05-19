@@ -6,13 +6,13 @@ import backend.academy.bot.schemas.requests.AddLinkRequest;
 import backend.academy.bot.schemas.requests.RemoveLinkRequest;
 import backend.academy.bot.schemas.responses.LinkResponse;
 import backend.academy.bot.schemas.responses.ListLinksResponse;
-import org.springframework.data.redis.core.RedisTemplate;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -47,7 +47,7 @@ public class ScrapperHttpClient implements ScrapperService {
         headers.set("Tg-Chat-Id", String.valueOf(chatId));
         HttpEntity<AddLinkRequest> requestEntity = new HttpEntity<>(request, headers);
         ResponseEntity<LinkResponse> response =
-            restTemplate.exchange(apiConfig.scrapper().links(), HttpMethod.POST, requestEntity, LinkResponse.class);
+                restTemplate.exchange(apiConfig.scrapper().links(), HttpMethod.POST, requestEntity, LinkResponse.class);
 
         log.info("Sent POST request {} \n {} \n {}", apiConfig.scrapper().links(), requestEntity.getHeaders(), request);
         log.info("Response received {} \n {}", response.getStatusCode(), response.getBody());
@@ -92,9 +92,10 @@ public class ScrapperHttpClient implements ScrapperService {
         log.info("Sent GET request {} \n {}", apiConfig.scrapper().links(), requestEntity.getHeaders());
         log.info("Response received {} \n {}", response.getStatusCode(), response.getBody());
 
-        List<Link> returnValue = response.getBody() != null && response.getBody().links() != null
-            ? response.getBody().links()
-            : new ArrayList<>();
+        List<Link> returnValue =
+                response.getBody() != null && response.getBody().links() != null
+                        ? response.getBody().links()
+                        : new ArrayList<>();
 
         redisTemplate.opsForValue().set(chatId, returnValue);
         log.info("The list of the user's {} subscriptions is saved in the cache", chatId);
