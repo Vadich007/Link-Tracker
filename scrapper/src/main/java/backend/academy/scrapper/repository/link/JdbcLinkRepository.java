@@ -2,13 +2,17 @@ package backend.academy.scrapper.repository.link;
 
 import backend.academy.scrapper.configs.DbConfig;
 import backend.academy.scrapper.db.JdbcUtils;
+import backend.academy.scrapper.schemas.models.Link;
 import backend.academy.scrapper.schemas.responses.github.Event;
 import backend.academy.scrapper.schemas.responses.stackoverflow.Item;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -28,18 +32,42 @@ public class JdbcLinkRepository implements LinkRepository {
     @Override
     @SneakyThrows
     public boolean containLink(String url) {
-        ResultSet rs = JdbcUtils.execute(connection, "SELECT COUNT(*) FROM links WHERE url = ?", url);
-        return rs != null && rs.next() && rs.getInt(1) != 0;
+        ResultSet rs = JdbcUtils.execute(connection, "SELECT EXISTS(SELECT 1 FROM links WHERE url = ?)", url);
+        return rs.next() && rs.getBoolean(1);
+    }
+
+    @Override
+    @SneakyThrows
+    public List<Link> getLinks(Long chatId) {
+        ResultSet rs = JdbcUtils.execute(
+            connection,
+            "SELECT links.id as link_id, subscriptions.tags, links.url, subscriptions.filters "
+                + "FROM subscriptions JOIN links ON links.id = subscriptions.link_id "
+                + "WHERE chat_id = ?",
+            chatId);
+
+        List<Link> links = new ArrayList<>();
+        while (rs.next()) {
+            String tags = rs.getString("tags");
+            String filters = rs.getString("filters");
+
+            links.add(new Link(
+                rs.getLong("link_id"),
+                rs.getString("url"),
+                tags != null ? Arrays.asList(tags.split(",")) : null,
+                filters != null ? Arrays.asList(filters.split(",")) : null));
+        }
+        return links;
     }
 
     @Override
     @SneakyThrows
     public Set<Long> getChats(String url) {
         ResultSet rs = JdbcUtils.execute(
-                connection,
-                "SELECT chat_id " + "FROM subscriptions JOIN links ON links.id = subscriptions.link_id "
-                        + "WHERE url = ?",
-                url);
+            connection,
+            "SELECT chat_id FROM subscriptions JOIN links ON links.id = subscriptions.link_id "
+                + "WHERE url = ?",
+            url);
 
         HashSet<Long> chats = new HashSet<>();
         while (rs.next()) {
@@ -87,17 +115,11 @@ public class JdbcLinkRepository implements LinkRepository {
         ResultSet rs = JdbcUtils.execute(connection, "SELECT id FROM links WHERE url = ?", url);
         if (rs != null && rs.next()) {
             JdbcUtils.update(
-                    connection,
-                    "DELETE FROM subscriptions WHERE link_id = ? AND chat_id = ?",
-                    rs.getLong("id"),
-                    chatId);
+                connection,
+                "DELETE FROM subscriptions WHERE link_id = ? AND chat_id = ?",
+                rs.getLong("id"),
+                chatId);
         }
-    }
-
-    @Override
-    public void clear() {
-        JdbcUtils.update(connection, "DELETE FROM links");
-        JdbcUtils.update(connection, "DELETE FROM subscriptions");
     }
 
     @Override
@@ -141,7 +163,7 @@ public class JdbcLinkRepository implements LinkRepository {
         ObjectMapper mapper = new ObjectMapper();
         try {
             JdbcUtils.update(
-                    connection, "UPDATE links SET last_event = ? WHERE url = ?", mapper.writeValueAsString(item), url);
+                connection, "UPDATE links SET last_event = ? WHERE url = ?", mapper.writeValueAsString(item), url);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -152,7 +174,7 @@ public class JdbcLinkRepository implements LinkRepository {
         ObjectMapper mapper = new ObjectMapper();
         try {
             JdbcUtils.update(
-                    connection, "UPDATE links SET last_event = ? WHERE url = ?", mapper.writeValueAsString(event), url);
+                connection, "UPDATE links SET last_event = ? WHERE url = ?", mapper.writeValueAsString(event), url);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

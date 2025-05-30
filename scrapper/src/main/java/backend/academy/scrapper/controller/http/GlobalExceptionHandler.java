@@ -17,13 +17,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
         ApiErrorResponse response = new ApiErrorResponse(
-                ex.getMessage(),
-                HttpStatus.NOT_FOUND.toString(),
-                IllegalArgumentException.class.getName(),
-                ex.getMessage(),
-                Arrays.stream(ex.getStackTrace())
-                        .map(StackTraceElement::toString)
-                        .toList());
+            ex.getMessage(),
+            HttpStatus.NOT_FOUND.toString(),
+            IllegalArgumentException.class.getName(),
+            ex.getMessage(),
+            Arrays.stream(ex.getStackTrace())
+                .map(StackTraceElement::toString)
+                .toList());
 
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
@@ -31,13 +31,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<ApiErrorResponse> handleNoSuchElementException(NoSuchElementException ex) {
         ApiErrorResponse response = new ApiErrorResponse(
-                ex.getMessage(),
-                HttpStatus.BAD_REQUEST.toString(),
-                NoSuchElementException.class.getName(),
-                ex.getMessage(),
-                Arrays.stream(ex.getStackTrace())
-                        .map(StackTraceElement::toString)
-                        .toList());
+            ex.getMessage(),
+            HttpStatus.BAD_REQUEST.toString(),
+            NoSuchElementException.class.getName(),
+            ex.getMessage(),
+            Arrays.stream(ex.getStackTrace())
+                .map(StackTraceElement::toString)
+                .toList());
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }

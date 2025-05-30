@@ -12,7 +12,7 @@ import liquibase.resource.ClassLoaderResourceAccessor;
 public class LiquibaseMigration {
     public static void migration(Connection connection, String path) throws LiquibaseException {
         Database database =
-                DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
+            DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
 
         Liquibase liquibase = new Liquibase(path, new ClassLoaderResourceAccessor(), database);
 

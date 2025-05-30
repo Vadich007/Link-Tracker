@@ -18,12 +18,12 @@ public class MessageService {
     private final Map<String, CommandHandler> commandHandlers;
 
     MessageService(
-            UserRepository userRepository,
-            StartHandler startHandler,
-            HelpHandler helpHandler,
-            TrackHandler trackHandler,
-            UntrackHandler untrackHandler,
-            ListHandler listHandler) {
+        UserRepository userRepository,
+        StartHandler startHandler,
+        HelpHandler helpHandler,
+        TrackHandler trackHandler,
+        UntrackHandler untrackHandler,
+        ListHandler listHandler) {
         this.userRepository = userRepository;
 
         this.commandHandlers = new HashMap<>();
@@ -59,8 +59,8 @@ public class MessageService {
         return switch (userRepository.getUser(chatId).state()) {
             case UserStates.FREE -> "Невозможно обработать сообщение";
             case UserStates.WAIT_UNTRACK_LINK -> commandHandlers
-                    .get(BotCommands.UNTRACK.command)
-                    .handle(chatId, text);
+                .get(BotCommands.UNTRACK.command)
+                .handle(chatId, text);
             default -> commandHandlers.get(BotCommands.TRACK.command).handle(chatId, text);
         };
     }

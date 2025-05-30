@@ -30,9 +30,9 @@ public class KafkaConfig {
 
     private String getTypeMapping() {
         return "backend.academy.scrapper.schemas.responses.bot.ListLinksResponse:"
-                + ListLinksResponse.class.getCanonicalName()
-                + ",backend.academy.scrapper.schemas.requests.LinkUpdateRequest:"
-                + LinkUpdateResponse.class.getCanonicalName();
+            + ListLinksResponse.class.getCanonicalName()
+            + ",backend.academy.scrapper.schemas.requests.LinkUpdateRequest:"
+            + LinkUpdateResponse.class.getCanonicalName();
     }
 
     @Bean
@@ -65,7 +65,7 @@ public class KafkaConfig {
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<Long, Object> kafkaListenerContainerFactory(
-            ConsumerFactory<Long, Object> consumerFactory, KafkaTemplate kafkaTemplate) {
+        ConsumerFactory<Long, Object> consumerFactory, KafkaTemplate kafkaTemplate) {
         ConcurrentKafkaListenerContainerFactory<Long, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
         DefaultErrorHandler errorHandler = new DefaultErrorHandler(new DeadLetterPublishingRecoverer(kafkaTemplate));
         factory.setConsumerFactory(consumerFactory);

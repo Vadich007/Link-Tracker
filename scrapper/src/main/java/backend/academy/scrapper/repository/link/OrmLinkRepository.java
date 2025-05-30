@@ -1,187 +1,170 @@
 package backend.academy.scrapper.repository.link;
 
+import backend.academy.scrapper.schemas.models.Link;
 import backend.academy.scrapper.schemas.orm.Links;
-import backend.academy.scrapper.schemas.orm.Subscriptions;
 import backend.academy.scrapper.schemas.responses.github.Event;
 import backend.academy.scrapper.schemas.responses.stackoverflow.Item;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.NoResultException;
-import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
 @ConditionalOnProperty(name = "app.access-type", havingValue = "orm")
-@RequiredArgsConstructor
-public class OrmLinkRepository implements LinkRepository {
-    @PersistenceContext
-    private final EntityManager entityManager;
+public interface OrmLinkRepository extends LinkRepository, JpaRepository<Links, Long> {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    ObjectMapper objectMapper = new ObjectMapper();
 
-    private Links findByUrl(String url) {
-        try {
-            return entityManager
-                    .createQuery("SELECT l FROM Links l WHERE l.url = :url", Links.class)
-                    .setParameter("url", url)
-                    .getSingleResult();
-        } catch (NoResultException e) {
-            return null;
-        }
-    }
+    Optional<Links> findByUrl(String url);
+
+    @Query("SELECT l FROM Links l JOIN l.subscriptions s WHERE s.chatId = :chatId")
+    List<Links> findLinksByChatId(@Param("chatId") Long chatId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "DELETE FROM Subscriptions s WHERE link_id = :linkId AND chat_id = :chatId", nativeQuery = true)
+    void deleteChatQuery(@Param("linkId") long linkId, @Param("chatId") long chatId);
 
     @Override
-    public boolean containLink(String url) {
-        return findByUrl(url) != null;
+    default boolean containLink(String url) {
+        return findByUrl(url).isPresent();
     }
 
     @Override
     @Transactional
-    public Set<Long> getChats(String url) {
-        String jpql = "SELECT s.chatId FROM Links l JOIN l.subscriptions s WHERE l.url = :url";
-        return entityManager
-                .createQuery(jpql, Long.class)
-                .setParameter("url", url)
-                .getResultStream()
-                .collect(Collectors.toSet());
+    default List<Link> getLinks(Long chatId) {
+        return findLinksByChatId(chatId).stream()
+            .map(Link::convertToLink)
+            .toList();
+    }
+
+    @Override
+    @Query("SELECT DISTINCT s.chatId FROM Links l JOIN l.subscriptions s WHERE l.url = :url")
+    Set<Long> getChats(@Param("url") String url);
+
+    @Override
+    @Transactional
+    default void deleteLink(String url) {
+        findByUrl(url).ifPresent(this::delete);
     }
 
     @Override
     @Transactional
-    public void deleteLink(String url) {
-        Links link = findByUrl(url);
-        if (link != null) {
-            entityManager.remove(link);
-        }
-    }
-
-    @Override
-    @Transactional
-    public void addLink(String url) {
+    default void addLink(String url) {
         String type = url.startsWith("https://github.com/") ? "gitHub" : "stackOverflow";
         Links link = new Links();
         link.url(url);
         link.type(type);
-        entityManager.persist(link);
+        save(link);
     }
 
     @Override
-    public Long getLinkId(String url) {
-        return findByUrl(url).id();
+    default Long getLinkId(String url) {
+        return findByUrl(url).map(Links::id).orElse(null);
+    }
+
+    @Override
+    @Query("SELECT l.url FROM Links l")
+    Set<String> getUrls(@Param("limit") int limit, @Param("offset") int offset);
+
+    @Override
+    @Transactional
+    default void deleteChat(String url, long chatId) {
+        findByUrl(url).stream().map(Links::id).findFirst().ifPresent(aLong -> deleteChatQuery(aLong, chatId));
+    }
+
+    @Override
+    default int size() {
+        return (int) count();
     }
 
     @Override
     @Transactional
-    public Set<String> getUrls(int limit, int offset) {
-        return entityManager
-                .createQuery("SELECT l.url FROM Links l", String.class)
-                .setFirstResult(offset)
-                .setMaxResults(limit)
-                .getResultStream()
-                .collect(Collectors.toSet());
-    }
-
-    @Override
-    @Transactional
-    public void deleteChat(String url, long chatId) {
-        Links link = findByUrl(url);
-        for (Subscriptions subscriptions : link.subscriptions()) {
-            if (subscriptions.chatId() == chatId) {
-                entityManager.remove(subscriptions);
-            }
-        }
-    }
-
-    @Override
-    @Transactional
-    public void clear() {
-        entityManager.createQuery("DELETE FROM Subscriptions").executeUpdate();
-        entityManager.createQuery("DELETE FROM Links").executeUpdate();
-    }
-
-    @Override
-    public int size() {
-        return entityManager
-                .createQuery("SELECT COUNT(l) FROM Links l", Long.class)
-                .getSingleResult()
-                .intValue();
-    }
-
-    @Override
-    @Transactional
-    public void setLastEvent(String url, Event event) {
-        Links link = findByUrl(url);
-        if (link != null) {
+    default void setLastEvent(String url, Event event) {
+        findByUrl(url).ifPresent(link -> {
             try {
                 link.lastEvent(objectMapper.writeValueAsString(event));
-                entityManager.merge(link);
+                save(link);
             } catch (JsonProcessingException e) {
                 throw new RuntimeException("Failed to convert JSON to Event", e);
             }
-        }
+        });
     }
 
     @Override
     @Transactional
-    public void setLastEvent(String url, Item item) {
-        Links link = findByUrl(url);
-        if (link != null) {
+    default void setLastEvent(String url, Item item) {
+        findByUrl(url).ifPresent(link -> {
             try {
                 link.lastEvent(objectMapper.writeValueAsString(item));
-                entityManager.merge(link);
+                save(link);
             } catch (JsonProcessingException e) {
                 throw new RuntimeException("Failed to convert JSON to Item", e);
             }
-        }
+        });
     }
 
     @Override
-    public boolean isLastEvent(String url, Event event) {
-        Links link = findByUrl(url);
-        if (link.lastEvent() == null) return false;
-
-        try {
-            return objectMapper.readValue(link.lastEvent(), Event.class).id().equals(event.id());
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to convert JSON to Event", e);
-        }
+    default boolean isLastEvent(String url, Event event) {
+        return findByUrl(url)
+            .map(link -> {
+                try {
+                    if (link.lastEvent() == null) return false;
+                    return objectMapper.readValue(link.lastEvent(), Event.class)
+                        .id().equals(event.id());
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException("Failed to convert JSON to Event", e);
+                }
+            })
+            .orElse(false);
     }
 
     @Override
-    public boolean isLastEvent(String url, Long postId) {
-        Links link = findByUrl(url);
-        if (link.lastEvent() == null) return false;
-
-        try {
-            return objectMapper.readValue(link.lastEvent(), Item.class).postId().equals(postId);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to convert JSON to Item", e);
-        }
+    default boolean isLastEvent(String url, Long postId) {
+        return findByUrl(url)
+            .map(link -> {
+                try {
+                    if (link.lastEvent() == null) return false;
+                    return objectMapper.readValue(link.lastEvent(), Item.class)
+                        .postId().equals(postId);
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException("Failed to convert JSON to Item", e);
+                }
+            })
+            .orElse(false);
     }
 
     @Override
-    public Event getLastGitHubEvent(String url) {
-        Links link = findByUrl(url);
-        try {
-            return objectMapper.readValue(link.lastEvent(), Event.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to convert JSON to Event", e);
-        }
+    default Event getLastGitHubEvent(String url) {
+        return findByUrl(url)
+            .map(link -> {
+                try {
+                    return objectMapper.readValue(link.lastEvent(), Event.class);
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException("Failed to convert JSON to Event", e);
+                }
+            })
+            .orElse(null);
     }
 
     @Override
-    public Item getLastStackOverflowEvent(String url) {
-        Links link = findByUrl(url);
-        try {
-            return objectMapper.readValue(link.lastEvent(), Item.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to convert JSON to Item", e);
-        }
+    default Item getLastStackOverflowEvent(String url) {
+        return findByUrl(url)
+            .map(link -> {
+                try {
+                    return objectMapper.readValue(link.lastEvent(), Item.class);
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException("Failed to convert JSON to Item", e);
+                }
+            })
+            .orElse(null);
     }
 }

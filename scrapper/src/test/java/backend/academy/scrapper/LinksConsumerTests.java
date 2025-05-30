@@ -1,7 +1,5 @@
 package backend.academy.scrapper;
 
-import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
-
 import backend.academy.scrapper.configs.DbConfig;
 import backend.academy.scrapper.db.LiquibaseMigration;
 import backend.academy.scrapper.repository.chat.ChatRepository;
@@ -34,19 +32,20 @@ import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.KafkaContainer;
+import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
 @Testcontainers
 @TestPropertySource(properties = "app.message-transport=kafka")
 @SpringBootTest
 public class LinksConsumerTests {
     private static KafkaContainer kafkaContainer =
-            new KafkaContainer("apache/kafka-native:3.8.1").withExposedPorts(9092);
+        new KafkaContainer("apache/kafka-native:3.8.1").withExposedPorts(9092);
 
     private static final PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>("postgres:17-alpine")
-            .withExposedPorts(5432)
-            .withDatabaseName("local")
-            .withUsername("postgres")
-            .withPassword("test");
+        .withExposedPorts(5432)
+        .withDatabaseName("local")
+        .withUsername("postgres")
+        .withPassword("test");
 
     @Autowired
     private ChatRepository chatRepository;
@@ -69,17 +68,17 @@ public class LinksConsumerTests {
 
         registry.add("spring.kafka.bootstrap-servers", kafkaContainer::getBootstrapServers);
         registry.add(
-                "spring.kafka.producer.key-serializer", () -> "org.apache.kafka.common.serialization.LongSerializer");
+            "spring.kafka.producer.key-serializer", () -> "org.apache.kafka.common.serialization.LongSerializer");
         registry.add(
-                "spring.kafka.producer.value-serializer",
-                () -> "org.springframework.kafka.support.serializer.JsonSerializer");
+            "spring.kafka.producer.value-serializer",
+            () -> "org.springframework.kafka.support.serializer.JsonSerializer");
         registry.add("spring.kafka.consumer.group-id", () -> "scrapper-consumer-group");
         registry.add(
-                "spring.kafka.consumer.key-deserializer",
-                () -> "org.apache.kafka.common.serialization.LongDeserializer");
+            "spring.kafka.consumer.key-deserializer",
+            () -> "org.apache.kafka.common.serialization.LongDeserializer");
         registry.add(
-                "spring.kafka.consumer.value-deserializer",
-                () -> "org.springframework.kafka.support.serializer.JsonDeserializer");
+            "spring.kafka.consumer.value-deserializer",
+            () -> "org.springframework.kafka.support.serializer.JsonDeserializer");
     }
 
     @BeforeAll
@@ -88,16 +87,16 @@ public class LinksConsumerTests {
         kafkaContainer.start();
 
         Connection connection = DriverManager.getConnection(
-                postgresContainer.getJdbcUrl(), postgresContainer.getUsername(), postgresContainer.getPassword());
+            postgresContainer.getJdbcUrl(), postgresContainer.getUsername(), postgresContainer.getPassword());
         LiquibaseMigration.migration(connection, "db/master.xml");
 
         String bootstrapServers = kafkaContainer.getBootstrapServers();
 
         try (AdminClient adminClient = AdminClient.create(Map.of("bootstrap.servers", bootstrapServers))) {
             adminClient
-                    .createTopics(List.of(new NewTopic(topic, 1, (short) 1)))
-                    .all()
-                    .get(10, TimeUnit.SECONDS);
+                .createTopics(List.of(new NewTopic(topic, 1, (short) 1)))
+                .all()
+                .get(10, TimeUnit.SECONDS);
 
             await().atMost(30, TimeUnit.SECONDS).until(() -> {
                 try {
@@ -120,11 +119,9 @@ public class LinksConsumerTests {
     @BeforeEach
     void setUp() {
         DbConfig config = new DbConfig(
-                postgresContainer.getJdbcUrl(), postgresContainer.getUsername(), postgresContainer.getPassword());
+            postgresContainer.getJdbcUrl(), postgresContainer.getUsername(), postgresContainer.getPassword());
         chatRepository = new JdbcChatRepository(config);
         linkRepository = new JdbcLinkRepository(config);
-        chatRepository.clear();
-        linkRepository.clear();
     }
 
     @Test
@@ -140,8 +137,8 @@ public class LinksConsumerTests {
         await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
             Assertions.assertEquals(1, linkRepository.size());
             Assertions.assertTrue(linkRepository.containLink(link));
-            Assertions.assertEquals(1, chatRepository.getLinks(chatId).size());
-            Assertions.assertEquals(link, chatRepository.getLinks(chatId).get(0).url());
+            Assertions.assertEquals(1, linkRepository.getLinks(chatId).size());
+            Assertions.assertEquals(link, linkRepository.getLinks(chatId).get(0).url());
         });
     }
 
@@ -158,7 +155,7 @@ public class LinksConsumerTests {
 
         await().atMost(10, TimeUnit.SECONDS).untilAsserted(() -> {
             Assertions.assertEquals(0, linkRepository.size());
-            Assertions.assertEquals(0, chatRepository.getLinks(chatId).size());
+            Assertions.assertEquals(0, linkRepository.getLinks(chatId).size());
         });
     }
 }

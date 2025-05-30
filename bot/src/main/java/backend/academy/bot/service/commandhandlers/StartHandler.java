@@ -32,8 +32,8 @@ public class StartHandler implements CommandHandler {
         } catch (HttpClientErrorException e) {
             ApiErrorResponse response = e.getResponseBodyAs(ApiErrorResponse.class);
             if (response != null
-                    && (response.exceptionMessage().equals("Чат с таким id уже зарегистрирован")
-                            || response.code().equals(HttpStatus.BAD_REQUEST.toString()))) {
+                && (response.exceptionMessage().equals("Чат с таким id уже зарегистрирован")
+                || response.code().equals(HttpStatus.BAD_REQUEST.toString()))) {
                 return "Вы уже зарегистрированы.";
             } else {
                 return "Произошла ошибка. Повторите попытку позже.";

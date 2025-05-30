@@ -7,9 +7,12 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @ConfigurationProperties(prefix = "api", ignoreUnknownFields = false)
 public record ApiConfig(GitHubApi github, StackOverflowApi stackoverflow, BotApi bot) {
-    public record GitHubApi(@NotEmpty String reposEvents) {}
+    public record GitHubApi(@NotEmpty String reposEvents) {
+    }
 
-    public record StackOverflowApi(@NotEmpty String questions, @NotEmpty String timeline, @NotEmpty String posts) {}
+    public record StackOverflowApi(@NotEmpty String questions, @NotEmpty String timeline, @NotEmpty String posts) {
+    }
 
-    public record BotApi(@NotEmpty String update) {}
+    public record BotApi(@NotEmpty String update) {
+    }
 }

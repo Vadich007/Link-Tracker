@@ -7,5 +7,6 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @ConfigurationProperties(prefix = "api", ignoreUnknownFields = false)
 public record ApiConfig(ScrapperApi scrapper) {
-    public record ScrapperApi(@NotEmpty String links, @NotEmpty String tgChat) {}
+    public record ScrapperApi(@NotEmpty String links, @NotEmpty String tgChat) {
+    }
 }

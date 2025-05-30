@@ -29,8 +29,8 @@ public class ListHandler implements CommandHandler {
         } catch (HttpClientErrorException e) {
             ApiErrorResponse response = e.getResponseBodyAs(ApiErrorResponse.class);
             if (response != null
-                    && (response.exceptionMessage().equals("Отсутствует чат с таким id")
-                            || response.code().equals(HttpStatus.BAD_REQUEST.toString()))) {
+                && (response.exceptionMessage().equals("Отсутствует чат с таким id")
+                || response.code().equals(HttpStatus.BAD_REQUEST.toString()))) {
                 return "Отсутствует чат с таким id.";
             } else {
                 return "Произошла ошибка. Повторите попытку позже.";

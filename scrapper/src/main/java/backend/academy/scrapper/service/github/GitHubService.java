@@ -48,41 +48,41 @@ public class GitHubService implements TrackedService<Event> {
             switch (GitHubEvents.getEnum(lastEvent.type())) {
                 case GitHubEvents.PULL_REQUEST_EVENT:
                     preview = lastEvent.payload().pullRequest().body().length() < 200
-                            ? lastEvent.payload().pullRequest().body()
-                            : lastEvent.payload().pullRequest().body().substring(0, 199);
+                        ? lastEvent.payload().pullRequest().body()
+                        : lastEvent.payload().pullRequest().body().substring(0, 199);
 
                     message = String.format(
-                            """
+                        """
                             Новый Pull Request
                             %s
                             %s
                             %s
                             %s
                             %s""",
-                            lastEvent.payload().pullRequest().title(),
-                            lastEvent.payload().pullRequest().user().login(),
-                            lastEvent.createdAt(),
-                            preview,
-                            url);
+                        lastEvent.payload().pullRequest().title(),
+                        lastEvent.payload().pullRequest().user().login(),
+                        lastEvent.createdAt(),
+                        preview,
+                        url);
                     break;
                 case GitHubEvents.ISSUES_EVENT:
                     preview = lastEvent.payload().issue().body().length() < 200
-                            ? lastEvent.payload().issue().body()
-                            : lastEvent.payload().issue().body().substring(0, 199);
+                        ? lastEvent.payload().issue().body()
+                        : lastEvent.payload().issue().body().substring(0, 199);
 
                     message = String.format(
-                            """
-                        Новый Issue
-                        %s
-                        %s
-                        %s
-                        %s
-                        %s""",
-                            lastEvent.payload().issue().title(),
-                            lastEvent.payload().issue().user().login(),
-                            lastEvent.createdAt(),
-                            preview,
-                            url);
+                        """
+                            Новый Issue
+                            %s
+                            %s
+                            %s
+                            %s
+                            %s""",
+                        lastEvent.payload().issue().title(),
+                        lastEvent.payload().issue().user().login(),
+                        lastEvent.createdAt(),
+                        preview,
+                        url);
                     break;
                 default:
                     break;

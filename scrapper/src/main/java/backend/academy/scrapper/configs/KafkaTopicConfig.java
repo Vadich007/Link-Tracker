@@ -8,5 +8,6 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties(prefix = "kafka", ignoreUnknownFields = false)
 public record KafkaTopicConfig(Topic topic) {
     public record Topic(
-            @NotEmpty String chats, @NotEmpty String links, @NotEmpty String listLinks, @NotEmpty String events) {}
+        @NotEmpty String chats, @NotEmpty String links, @NotEmpty String listLinks, @NotEmpty String events) {
+    }
 }

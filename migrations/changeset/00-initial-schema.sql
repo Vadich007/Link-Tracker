@@ -17,6 +17,7 @@ CREATE TABLE links (
 );
 
 CREATE TABLE subscriptions (
+    id BIGSERIAL PRIMARY KEY,
     chat_id BIGINT NOT NULL,
     link_id BIGINT NOT NULL,
     tags VARCHAR,

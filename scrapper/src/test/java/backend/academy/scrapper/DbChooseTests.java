@@ -1,8 +1,5 @@
 package backend.academy.scrapper;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-
 import backend.academy.scrapper.repository.chat.JdbcChatRepository;
 import backend.academy.scrapper.repository.chat.OrmChatRepository;
 import backend.academy.scrapper.repository.link.JdbcLinkRepository;
@@ -16,6 +13,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class DbChooseTests {
 
@@ -24,10 +23,10 @@ public class DbChooseTests {
     class OrmTests {
 
         private static final PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>("postgres:17-alpine")
-                .withExposedPorts(5432)
-                .withDatabaseName("local")
-                .withUsername("postgres")
-                .withPassword("test");
+            .withExposedPorts(5432)
+            .withDatabaseName("local")
+            .withUsername("postgres")
+            .withPassword("test");
 
         @DynamicPropertySource
         static void configureProperties(DynamicPropertyRegistry registry) {
@@ -74,10 +73,10 @@ public class DbChooseTests {
     class JdbcTests {
 
         private static final PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>("postgres:17-alpine")
-                .withExposedPorts(5432)
-                .withDatabaseName("local")
-                .withUsername("postgres")
-                .withPassword("test");
+            .withExposedPorts(5432)
+            .withDatabaseName("local")
+            .withUsername("postgres")
+            .withPassword("test");
 
         @DynamicPropertySource
         static void configureProperties(DynamicPropertyRegistry registry) {

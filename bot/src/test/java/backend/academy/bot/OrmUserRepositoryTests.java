@@ -1,11 +1,5 @@
 package backend.academy.bot;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import backend.academy.bot.db.LiquibaseMigration;
 import backend.academy.bot.repository.UserRepository;
 import backend.academy.bot.schemas.models.User;
@@ -16,8 +10,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
 import liquibase.exception.LiquibaseException;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +20,11 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
 @SpringBootTest
@@ -34,10 +32,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 public class OrmUserRepositoryTests {
 
     private static final PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>("postgres:17-alpine")
-            .withExposedPorts(5432)
-            .withDatabaseName("local")
-            .withUsername("postgres")
-            .withPassword("test");
+        .withExposedPorts(5432)
+        .withDatabaseName("local")
+        .withUsername("postgres")
+        .withPassword("test");
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
@@ -52,20 +50,15 @@ public class OrmUserRepositoryTests {
     private UserRepository userRepository;
 
     @BeforeEach
-    void setUp() {
-        userRepository.clear();
-    }
-
-    @BeforeAll
-    static void beforeAll() throws SQLException, LiquibaseException {
+    void setUp() throws SQLException, LiquibaseException {
         postgresContainer.start();
         Connection connection = DriverManager.getConnection(
-                postgresContainer.getJdbcUrl(), postgresContainer.getUsername(), postgresContainer.getPassword());
+            postgresContainer.getJdbcUrl(), postgresContainer.getUsername(), postgresContainer.getPassword());
         LiquibaseMigration.migration(connection, "db/master.xml");
     }
 
-    @AfterAll
-    static void afterAll() {
+    @AfterEach
+    void afterEach() {
         postgresContainer.stop();
     }
 
@@ -125,17 +118,5 @@ public class OrmUserRepositoryTests {
 
         userRepository.deleteAddLinkRequest(chatId);
         assertNull(userRepository.getAddLinkRequest(chatId));
-    }
-
-    @Test
-    void shouldClearAllUsers() {
-        userRepository.addUser(1L);
-        userRepository.addUser(2L);
-
-        assertEquals(2, userRepository.size());
-
-        userRepository.clear();
-
-        assertEquals(0, userRepository.size());
     }
 }

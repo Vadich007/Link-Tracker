@@ -32,15 +32,15 @@ public class ListenerService {
 
                 if (url.startsWith("https://github.com/") && gitHubService.hasUpdate(url))
                     botService.sendUpdate(
-                            url,
-                            linkRepository.getChats(url).stream().toList(),
-                            gitHubService.getLastUpdateMessage(url, linkRepository.getLastGitHubEvent(url)));
+                        url,
+                        linkRepository.getChats(url).stream().toList(),
+                        gitHubService.getLastUpdateMessage(url, linkRepository.getLastGitHubEvent(url)));
                 else if (url.startsWith("https://stackoverflow.com/") && stackOverflowService.hasUpdate(url))
                     botService.sendUpdate(
-                            url,
-                            linkRepository.getChats(url).stream().toList(),
-                            stackOverflowService.getLastUpdateMessage(
-                                    url, linkRepository.getLastStackOverflowEvent(url)));
+                        url,
+                        linkRepository.getChats(url).stream().toList(),
+                        stackOverflowService.getLastUpdateMessage(
+                            url, linkRepository.getLastStackOverflowEvent(url)));
             }
         }
     }

@@ -4,4 +4,5 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record Event(String id, String type, Payload payload, @JsonProperty("created_at") String createdAt) {}
+public record Event(String id, String type, Payload payload, @JsonProperty("created_at") String createdAt) {
+}

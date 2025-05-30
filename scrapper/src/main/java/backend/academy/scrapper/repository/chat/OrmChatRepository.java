@@ -2,77 +2,55 @@ package backend.academy.scrapper.repository.chat;
 
 import backend.academy.scrapper.schemas.models.Link;
 import backend.academy.scrapper.schemas.orm.Chats;
-import backend.academy.scrapper.schemas.orm.Links;
-import backend.academy.scrapper.schemas.orm.Subscriptions;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
-import java.util.List;
-import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
 @ConditionalOnProperty(name = "app.access-type", havingValue = "orm")
-@RequiredArgsConstructor
-public class OrmChatRepository implements ChatRepository {
-    @PersistenceContext
-    private final EntityManager entityManager;
+public interface OrmChatRepository extends ChatRepository, JpaRepository<Chats, Long> {
+
+    @Transactional
+    @Modifying
+    @Query(value = "INSERT INTO subscriptions (chat_id, link_id, tags, filters) " +
+        "VALUES (:chatId, :linkId, :tags, :filters)", nativeQuery = true)
+    void subscribe(
+        @Param("chatId") Long chatId,
+        @Param("linkId") Long linkId,
+        @Param("tags") String tags,
+        @Param("filters") String filters
+    );
 
     @Override
-    public boolean containChat(Long chatId) {
-        return entityManager.find(Chats.class, chatId) != null;
+    default boolean containChat(Long chatId) {
+        return existsById(chatId);
     }
 
     @Override
     @Transactional
-    public List<Link> getLinks(Long chatId) {
-        String jpql = "SELECT l FROM Links l JOIN l.subscriptions s WHERE s.chatId = :chatId";
-        return entityManager.createQuery(jpql, Links.class).setParameter("chatId", chatId).getResultList().stream()
-                .map(Link::convertToLink)
-                .toList();
+    default void deleteChat(Long chatId) {
+        deleteById(chatId);
     }
 
     @Override
     @Transactional
-    public void deleteChat(Long chatId) {
-        Chats chat = entityManager.find(Chats.class, chatId);
-        if (chat != null) {
-            entityManager.remove(chat);
-        }
+    default void addChat(Long chatId) {
+        save(new Chats().chatId(chatId));
     }
 
     @Override
-    @Transactional
-    public void addChat(Long chatId) {
-        Chats chat = new Chats(chatId);
-        entityManager.persist(chat);
+    default void subscribeLink(Long chatId, Link link) {
+        String tags = link.tags() != null ? String.join(",", link.tags()) : null;
+        String filters = link.filters() != null ? String.join(",", link.filters()) : null;
+        subscribe(chatId, link.id(), tags, filters);
     }
 
     @Override
-    @Transactional
-    public void subscribeLink(Long chatId, Link link) {
-        Links linkEntity = entityManager.find(Links.class, link.id());
-        Subscriptions subscriptions = new Subscriptions();
-        subscriptions.chatId(chatId);
-        subscriptions.link(linkEntity);
-        subscriptions.tags(link.tags() != null ? String.join(",", link.tags()) : null);
-        subscriptions.filters(link.filters() != null ? String.join(",", link.filters()) : null);
-
-        entityManager.persist(subscriptions);
-    }
-
-    @Override
-    @Transactional
-    public void clear() {
-        entityManager.createQuery("DELETE FROM Subscriptions").executeUpdate();
-        entityManager.createQuery("DELETE FROM Chats").executeUpdate();
-    }
-
-    @Override
-    public int size() {
-        Long count =
-                (Long) entityManager.createQuery("SELECT COUNT(s) FROM Chats s").getSingleResult();
-        return count.intValue();
+    default int size() {
+        return (int) count();
     }
 }

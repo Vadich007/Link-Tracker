@@ -17,13 +17,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<ApiErrorResponse> handleNoSuchElementException(NoSuchElementException ex) {
         ApiErrorResponse response = new ApiErrorResponse(
-                ex.getMessage(),
-                HttpStatus.BAD_REQUEST.toString(),
-                NoSuchElementException.class.getName(),
-                ex.getMessage(),
-                Arrays.stream(ex.getStackTrace())
-                        .map(StackTraceElement::toString)
-                        .toList());
+            ex.getMessage(),
+            HttpStatus.BAD_REQUEST.toString(),
+            NoSuchElementException.class.getName(),
+            ex.getMessage(),
+            Arrays.stream(ex.getStackTrace())
+                .map(StackTraceElement::toString)
+                .toList());
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }

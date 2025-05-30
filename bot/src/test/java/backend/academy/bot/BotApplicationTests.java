@@ -12,10 +12,10 @@ import org.testcontainers.containers.PostgreSQLContainer;
 class BotApplicationTests {
 
     private static final PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>("postgres:17-alpine")
-            .withExposedPorts(5432)
-            .withDatabaseName("local")
-            .withUsername("postgres")
-            .withPassword("test");
+        .withExposedPorts(5432)
+        .withDatabaseName("local")
+        .withUsername("postgres")
+        .withPassword("test");
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
@@ -37,5 +37,6 @@ class BotApplicationTests {
     }
 
     @Test
-    void contextLoads() {}
+    void contextLoads() {
+    }
 }

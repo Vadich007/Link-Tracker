@@ -6,4 +6,5 @@ import org.springframework.validation.annotation.Validated;
 
 @Validated
 @ConfigurationProperties(prefix = "db", ignoreUnknownFields = false)
-public record DbConfig(@NotEmpty String url, @NotEmpty String username, @NotEmpty String password) {}
+public record DbConfig(@NotEmpty String url, @NotEmpty String username, @NotEmpty String password) {
+}

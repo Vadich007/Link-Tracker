@@ -22,18 +22,18 @@ public class GitHubServiceTests {
 
         String actual = gitHubService.getLastUpdateMessage(url, event);
         String expect = String.format(
-                """
+            """
                 Новый Pull Request
                 %s
                 %s
                 %s
                 %s
                 %s""",
-                event.payload().pullRequest().title(),
-                event.payload().pullRequest().user().login(),
-                event.createdAt(),
-                "body",
-                url);
+            event.payload().pullRequest().title(),
+            event.payload().pullRequest().user().login(),
+            event.createdAt(),
+            "body",
+            url);
 
         Assertions.assertEquals(actual, expect);
     }
@@ -65,18 +65,18 @@ public class GitHubServiceTests {
 
         String actual = gitHubService.getLastUpdateMessage(url, event);
         String expect = String.format(
-                """
+            """
                 Новый Pull Request
                 %s
                 %s
                 %s
                 %s
                 %s""",
-                event.payload().pullRequest().title(),
-                event.payload().pullRequest().user().login(),
-                event.createdAt(),
-                body.substring(0, 199),
-                url);
+            event.payload().pullRequest().title(),
+            event.payload().pullRequest().user().login(),
+            event.createdAt(),
+            body.substring(0, 199),
+            url);
 
         Assertions.assertEquals(actual, expect);
     }
@@ -92,18 +92,18 @@ public class GitHubServiceTests {
 
         String actual = gitHubService.getLastUpdateMessage(url, event);
         String expect = String.format(
-                """
+            """
                 Новый Pull Request
                 %s
                 %s
                 %s
                 %s
                 %s""",
-                event.payload().pullRequest().title(),
-                event.payload().pullRequest().user().login(),
-                event.createdAt(),
-                body.substring(0, 199),
-                url);
+            event.payload().pullRequest().title(),
+            event.payload().pullRequest().user().login(),
+            event.createdAt(),
+            body.substring(0, 199),
+            url);
 
         Assertions.assertEquals(actual, expect);
     }
@@ -119,18 +119,18 @@ public class GitHubServiceTests {
 
         String actual = gitHubService.getLastUpdateMessage(url, event);
         String expect = String.format(
-                """
+            """
                 Новый Pull Request
                 %s
                 %s
                 %s
                 %s
                 %s""",
-                event.payload().pullRequest().title(),
-                event.payload().pullRequest().user().login(),
-                event.createdAt(),
-                body,
-                url);
+            event.payload().pullRequest().title(),
+            event.payload().pullRequest().user().login(),
+            event.createdAt(),
+            body,
+            url);
 
         Assertions.assertEquals(actual, expect);
     }
@@ -145,18 +145,18 @@ public class GitHubServiceTests {
 
         String actual = gitHubService.getLastUpdateMessage(url, event);
         String expect = String.format(
-                """
+            """
                 Новый Issue
                 %s
                 %s
                 %s
                 %s
                 %s""",
-                event.payload().issue().title(),
-                event.payload().issue().user().login(),
-                event.createdAt(),
-                "body",
-                url);
+            event.payload().issue().title(),
+            event.payload().issue().user().login(),
+            event.createdAt(),
+            "body",
+            url);
 
         Assertions.assertEquals(actual, expect);
     }
@@ -204,14 +204,14 @@ public class GitHubServiceTests {
 
         String actual = gitHubService.getLastUpdateMessage(url, event);
         String expect = String.format(
-                """
+            """
                 Новый Issue
                 %s
                 %s
                 %s
                 %s
                 %s""",
-                event.payload().issue().title(), event.payload().issue().user().login(), event.createdAt(), body, url);
+            event.payload().issue().title(), event.payload().issue().user().login(), event.createdAt(), body, url);
 
         Assertions.assertEquals(actual, expect);
     }
@@ -227,18 +227,18 @@ public class GitHubServiceTests {
 
         String actual = gitHubService.getLastUpdateMessage(url, event);
         String expect = String.format(
-                """
+            """
                 Новый Issue
                 %s
                 %s
                 %s
                 %s
                 %s""",
-                event.payload().issue().title(),
-                event.payload().issue().user().login(),
-                event.createdAt(),
-                body.substring(0, 199),
-                url);
+            event.payload().issue().title(),
+            event.payload().issue().user().login(),
+            event.createdAt(),
+            body.substring(0, 199),
+            url);
 
         Assertions.assertEquals(actual, expect);
     }
@@ -254,18 +254,18 @@ public class GitHubServiceTests {
 
         String actual = gitHubService.getLastUpdateMessage(url, event);
         String expect = String.format(
-                """
+            """
                 Новый Issue
                 %s
                 %s
                 %s
                 %s
                 %s""",
-                event.payload().issue().title(),
-                event.payload().issue().user().login(),
-                event.createdAt(),
-                body.substring(0, 199),
-                url);
+            event.payload().issue().title(),
+            event.payload().issue().user().login(),
+            event.createdAt(),
+            body.substring(0, 199),
+            url);
 
         Assertions.assertEquals(actual, expect);
     }

@@ -4,6 +4,8 @@ import backend.academy.scrapper.configs.ApiConfig;
 import backend.academy.scrapper.configs.ScrapperConfig;
 import backend.academy.scrapper.schemas.responses.github.Event;
 import backend.academy.scrapper.schemas.responses.github.GitHubReposEventsResponse;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import java.util.Arrays;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -19,10 +21,12 @@ import org.springframework.web.client.RestTemplate;
 @Component
 @Slf4j
 public class GitHubClient {
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
     private final ScrapperConfig config;
     private final ApiConfig apiConfig;
 
+    @Retry(name = "scrapper")
+    @CircuitBreaker(name = "scrapper")
     public GitHubReposEventsResponse sendEventResponse(String owner, String repos) {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", config.githubToken());
@@ -31,8 +35,11 @@ public class GitHubClient {
 
         ResponseEntity<Event[]> response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, Event[].class);
 
-        log.info("Sent GET request {} {}", url, requestEntity.getHeaders());
-        log.info("Response received {} \n {}", response.getStatusCode(), response.getBody());
+        log.info("""
+                Sent GET request {} {}
+                Response received {}
+                {}""",
+            url, requestEntity.getHeaders(), response.getStatusCode(), response.getBody());
 
         return new GitHubReposEventsResponse(Arrays.asList(Objects.requireNonNull(response.getBody())));
     }

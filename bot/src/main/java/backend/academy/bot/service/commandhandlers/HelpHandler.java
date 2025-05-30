@@ -15,10 +15,10 @@ public class HelpHandler implements CommandHandler {
         StringBuilder messageBuilder = new StringBuilder();
         for (BotCommands commands : BotCommands.values())
             messageBuilder
-                    .append(commands.command)
-                    .append(" - ")
-                    .append(commands.description)
-                    .append("\n");
+                .append(commands.command)
+                .append(" - ")
+                .append(commands.description)
+                .append("\n");
         return messageBuilder.toString();
     }
 }

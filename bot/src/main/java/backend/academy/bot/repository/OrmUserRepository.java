@@ -3,108 +3,93 @@ package backend.academy.bot.repository;
 import backend.academy.bot.schemas.models.User;
 import backend.academy.bot.schemas.models.UserStates;
 import backend.academy.bot.schemas.requests.AddLinkRequest;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
 @ConditionalOnProperty(name = "app.access-type", havingValue = "orm")
-@RequiredArgsConstructor
-public class OrmUserRepository implements UserRepository {
-    @PersistenceContext
-    private final EntityManager entityManager;
+public interface OrmUserRepository extends UserRepository, JpaRepository<User, Long> {
+
+    boolean existsById(Long id);
 
     @Override
-    public boolean contain(long chatId) {
-        return entityManager.find(User.class, chatId) != null;
+    default boolean contain(long chatId) {
+        return existsById(chatId);
     }
 
     @Override
     @Transactional
-    public void addUser(long chatId) {
+    default void addUser(long chatId) {
         User user = new User();
         user.chatId(chatId);
         user.state(UserStates.FREE);
-        entityManager.persist(user);
+        save(user);
     }
 
     @Override
-    public User getUser(long chatId) {
-        return entityManager.find(User.class, chatId);
+    default User getUser(long chatId) {
+        return findById(chatId).orElse(null);
     }
 
     @Override
     @Transactional
-    public void updateState(long chatId, UserStates state) {
-        User user = entityManager.find(User.class, chatId);
-        if (user != null) {
+    default void updateState(long chatId, UserStates state) {
+        findById(chatId).ifPresent(user -> {
             user.state(state);
-            entityManager.merge(user);
-        }
+            save(user);
+        });
     }
 
     @Override
     @Transactional
-    public void addUrl(long chatId, String url) {
-        User user = entityManager.find(User.class, chatId);
-        if (user != null) {
+    default void addUrl(long chatId, String url) {
+        findById(chatId).ifPresent(user -> {
             AddLinkRequest addLinkRequest = new AddLinkRequest();
             addLinkRequest.link(url);
             user.addLinkRequest(addLinkRequest);
-            entityManager.merge(user);
-        }
+            save(user);
+        });
     }
 
     @Override
     @Transactional
-    public void addTags(long chatId, List<String> tags) {
-        User user = entityManager.find(User.class, chatId);
-        if (user != null) {
+    default void addTags(long chatId, List<String> tags) {
+        findById(chatId).ifPresent(user -> {
             user.addLinkRequest().tags(tags);
-            entityManager.merge(user);
-        }
+            save(user);
+        });
     }
 
     @Override
     @Transactional
-    public void addFilters(long chatId, List<String> filters) {
-        User user = entityManager.find(User.class, chatId);
-        if (user != null) {
+    default void addFilters(long chatId, List<String> filters) {
+        findById(chatId).ifPresent(user -> {
             user.addLinkRequest().filters(filters);
-            entityManager.merge(user);
-        }
+            save(user);
+        });
     }
 
     @Override
-    public AddLinkRequest getAddLinkRequest(long chatId) {
-        return entityManager.find(User.class, chatId).addLinkRequest();
+    default AddLinkRequest getAddLinkRequest(long chatId) {
+        return findById(chatId)
+            .map(User::addLinkRequest)
+            .orElse(null);
     }
 
     @Override
     @Transactional
-    public void deleteAddLinkRequest(long chatId) {
-        User user = entityManager.find(User.class, chatId);
-        if (user != null) {
+    default void deleteAddLinkRequest(long chatId) {
+        findById(chatId).ifPresent(user -> {
             user.addLinkRequest(null);
-            entityManager.merge(user);
-        }
+            save(user);
+        });
     }
 
     @Override
-    @Transactional
-    public void clear() {
-        entityManager.createQuery("DELETE FROM User").executeUpdate();
-    }
-
-    @Override
-    public int size() {
-        return entityManager
-                .createQuery("SELECT COUNT(u) FROM User u", Long.class)
-                .getSingleResult()
-                .intValue();
+    default int size() {
+        return (int) count();
     }
 }

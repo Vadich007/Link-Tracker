@@ -2,6 +2,7 @@ package backend.academy.bot.controller.http;
 
 import backend.academy.bot.schemas.responses.LinkUpdateResponse;
 import backend.academy.bot.service.NotificationService;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ public class BotController {
     private NotificationService notificationService;
 
     @PostMapping
+    @RateLimiter(name = "bot")
     public void updateLink(@NotNull @RequestBody @Validated LinkUpdateResponse linkUpdateResponse) {
         log.info("Link update received {} for users {}", linkUpdateResponse.url(), linkUpdateResponse.tgChatIds());
         String message = "Новое обновление\n" + linkUpdateResponse.url() + "\n" + linkUpdateResponse.description();

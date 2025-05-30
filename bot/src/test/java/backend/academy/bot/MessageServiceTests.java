@@ -23,10 +23,10 @@ public class MessageServiceTests {
     private UserRepository userRepository;
 
     private static final PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>("postgres:17-alpine")
-            .withExposedPorts(5432)
-            .withDatabaseName("local")
-            .withUsername("postgres")
-            .withPassword("test");
+        .withExposedPorts(5432)
+        .withDatabaseName("local")
+        .withUsername("postgres")
+        .withPassword("test");
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {

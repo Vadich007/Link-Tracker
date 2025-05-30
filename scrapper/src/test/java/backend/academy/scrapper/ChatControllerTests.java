@@ -1,16 +1,16 @@
 package backend.academy.scrapper;
 
+import backend.academy.scrapper.configs.DbConfig;
 import backend.academy.scrapper.db.LiquibaseMigration;
 import backend.academy.scrapper.repository.chat.ChatRepository;
-import backend.academy.scrapper.repository.link.LinkRepository;
+import backend.academy.scrapper.repository.chat.JdbcChatRepository;
 import backend.academy.scrapper.schemas.responses.bot.ApiErrorResponse;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import liquibase.exception.LiquibaseException;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,16 +29,13 @@ import org.testcontainers.containers.PostgreSQLContainer;
 public class ChatControllerTests {
 
     private static final PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>("postgres:17-alpine")
-            .withExposedPorts(5432)
-            .withDatabaseName("local")
-            .withUsername("postgres")
-            .withPassword("test");
+        .withExposedPorts(5432)
+        .withDatabaseName("local")
+        .withUsername("postgres")
+        .withPassword("test");
 
     @Autowired
     private ChatRepository chatRepository;
-
-    @Autowired
-    private LinkRepository linkRepository;
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
@@ -50,21 +47,18 @@ public class ChatControllerTests {
     }
 
     @BeforeEach
-    void setUp() {
-        chatRepository.clear();
-        linkRepository.clear();
-    }
-
-    @BeforeAll
-    static void beforeAll() throws SQLException, LiquibaseException {
+    void setUp() throws SQLException, LiquibaseException {
         postgresContainer.start();
         Connection connection = DriverManager.getConnection(
-                postgresContainer.getJdbcUrl(), postgresContainer.getUsername(), postgresContainer.getPassword());
+            postgresContainer.getJdbcUrl(), postgresContainer.getUsername(), postgresContainer.getPassword());
         LiquibaseMigration.migration(connection, "db/master.xml");
+        DbConfig config = new DbConfig(
+            postgresContainer.getJdbcUrl(), postgresContainer.getUsername(), postgresContainer.getPassword());
+        chatRepository = new JdbcChatRepository(config);
     }
 
-    @AfterAll
-    static void afterAll() {
+    @AfterEach
+    void afterEach() {
         postgresContainer.stop();
     }
 

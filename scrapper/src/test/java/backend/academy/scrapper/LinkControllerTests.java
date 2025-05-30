@@ -1,7 +1,10 @@
 package backend.academy.scrapper;
 
+import backend.academy.scrapper.configs.DbConfig;
 import backend.academy.scrapper.db.LiquibaseMigration;
 import backend.academy.scrapper.repository.chat.ChatRepository;
+import backend.academy.scrapper.repository.chat.JdbcChatRepository;
+import backend.academy.scrapper.repository.link.JdbcLinkRepository;
 import backend.academy.scrapper.repository.link.LinkRepository;
 import backend.academy.scrapper.schemas.models.Link;
 import backend.academy.scrapper.schemas.requests.AddLinkRequest;
@@ -14,9 +17,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import liquibase.exception.LiquibaseException;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,10 +40,10 @@ import org.testcontainers.containers.PostgreSQLContainer;
 public class LinkControllerTests {
 
     private static final PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>("postgres:17-alpine")
-            .withExposedPorts(5432)
-            .withDatabaseName("local")
-            .withUsername("postgres")
-            .withPassword("test");
+        .withExposedPorts(5432)
+        .withDatabaseName("local")
+        .withUsername("postgres")
+        .withPassword("test");
 
     @Autowired
     private ChatRepository chatRepository;
@@ -59,21 +61,19 @@ public class LinkControllerTests {
     }
 
     @BeforeEach
-    void setUp() {
-        chatRepository.clear();
-        linkRepository.clear();
-    }
-
-    @BeforeAll
-    static void beforeAll() throws SQLException, LiquibaseException {
+    void setUp() throws SQLException, LiquibaseException {
         postgresContainer.start();
         Connection connection = DriverManager.getConnection(
-                postgresContainer.getJdbcUrl(), postgresContainer.getUsername(), postgresContainer.getPassword());
+            postgresContainer.getJdbcUrl(), postgresContainer.getUsername(), postgresContainer.getPassword());
         LiquibaseMigration.migration(connection, "db/master.xml");
+        DbConfig config = new DbConfig(
+            postgresContainer.getJdbcUrl(), postgresContainer.getUsername(), postgresContainer.getPassword());
+        chatRepository = new JdbcChatRepository(config);
+        linkRepository = new JdbcLinkRepository(config);
     }
 
-    @AfterAll
-    static void afterAll() {
+    @AfterEach
+    void afterEach() {
         postgresContainer.stop();
     }
 
@@ -120,13 +120,13 @@ public class LinkControllerTests {
         headers.set("Tg-Chat-Id", String.valueOf(1));
         HttpEntity<AddLinkRequest> requestEntity = new HttpEntity<>(request, headers);
         ResponseEntity<LinkResponse> response =
-                restTemplate.exchange(scrapperLinksUrl, HttpMethod.POST, requestEntity, LinkResponse.class);
+            restTemplate.exchange(scrapperLinksUrl, HttpMethod.POST, requestEntity, LinkResponse.class);
 
         Assertions.assertEquals(expectedResponse.url(), response.getBody().url());
         Assertions.assertEquals(expectedResponse.tags(), response.getBody().tags());
         Assertions.assertEquals(expectedResponse.filters(), response.getBody().filters());
 
-        var links = chatRepository.getLinks(1L);
+        var links = linkRepository.getLinks(1L);
 
         Assertions.assertEquals(links.size(), 1);
         Assertions.assertEquals(links.getFirst().url(), response.getBody().url());
@@ -134,7 +134,7 @@ public class LinkControllerTests {
         Assertions.assertEquals(links.getFirst().filters(), response.getBody().filters());
         Assertions.assertTrue(linkRepository.containLink("https://github.com/Vadich007/test"));
         Assertions.assertTrue(
-                linkRepository.getChats("https://github.com/Vadich007/test").contains(1L));
+            linkRepository.getChats("https://github.com/Vadich007/test").contains(1L));
     }
 
     @Test
@@ -156,13 +156,13 @@ public class LinkControllerTests {
         headers.set("Tg-Chat-Id", String.valueOf(1));
         HttpEntity<RemoveLinkRequest> requestEntity = new HttpEntity<>(request, headers);
         ResponseEntity<LinkResponse> response =
-                restTemplate.exchange(scrapperLinksUrl, HttpMethod.DELETE, requestEntity, LinkResponse.class);
+            restTemplate.exchange(scrapperLinksUrl, HttpMethod.DELETE, requestEntity, LinkResponse.class);
 
         Assertions.assertEquals(expectedResponse.id(), response.getBody().id());
         Assertions.assertEquals(expectedResponse.url(), response.getBody().url());
         Assertions.assertEquals(expectedResponse.tags(), response.getBody().tags());
         Assertions.assertEquals(expectedResponse.filters(), response.getBody().filters());
-        Assertions.assertEquals(chatRepository.getLinks(1L).size(), 0);
+        Assertions.assertEquals(linkRepository.getLinks(1L).size(), 0);
         Assertions.assertEquals(linkRepository.size(), 0);
     }
 

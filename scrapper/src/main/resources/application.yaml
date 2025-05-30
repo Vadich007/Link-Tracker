@@ -8,6 +8,8 @@ app:
   limit: 100
   message-transport: http
 
+timeout: 10
+
 api:
   github:
     repos-events: https://api.github.com/repos/{owner}/{repos}/events
@@ -21,6 +23,34 @@ db:
   url: jdbc:postgresql://localhost:5432/link_tracker_bot
   username: ${DB_USER} # env variable
   password: ${DB_PASSWORD} # env variable
+
+resilience4j:
+  retry:
+    instances:
+      scrapper:
+        maxAttempts: 3
+        waitDuration: 500
+        exponential-backoff-multiplier: 1.5
+        enable-exponential-backoff: true
+        retryExceptions:
+          - org.springframework.web.client.HttpServerErrorException
+          - org.springframework.web.client.ResourceAccessException
+  ratelimiter:
+    instances:
+      scrapper:
+        limitForPeriod: 3
+        timeoutDuration: 0s
+        limitRefreshPeriod: 5s
+  circuitbreaker:
+    instances:
+      bot:
+        registerHealthIndicator: true
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 10
+        minimumRequiredCalls: 20
+        failureRateThreshold: 50
+        permittedCallsInHalfOpenState: 2
+        waitDurationInOpenState: 5s
 
 kafka:
   topic:

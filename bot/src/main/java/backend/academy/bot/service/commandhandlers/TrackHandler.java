@@ -36,14 +36,14 @@ public class TrackHandler implements CommandHandler {
                 userRepository.updateState(chatId, UserStates.WAIT_TAGS);
                 userRepository.addUrl(chatId, message);
                 return "Введите через пробел теги, которые ходите присвоить ссылке или '" + rejectionLine
-                        + "', если хотите оставить теги пустые.";
+                    + "', если хотите оставить теги пустые.";
 
             case UserStates.WAIT_TAGS:
                 userRepository.updateState(chatId, UserStates.WAIT_FILTERS);
                 if (!message.equals(rejectionLine) && !message.isEmpty())
                     userRepository.addTags(chatId, Arrays.asList(message.split(" ")));
                 return "Введите через пробел фильтры, которые ходите присвоить ссылке или '" + rejectionLine
-                        + "', если хотите оставить фильтры пустые.";
+                    + "', если хотите оставить фильтры пустые.";
 
             case WAIT_FILTERS:
                 userRepository.updateState(chatId, UserStates.FREE);
@@ -58,7 +58,7 @@ public class TrackHandler implements CommandHandler {
                     userRepository.deleteAddLinkRequest(chatId);
                     try {
                         ApiErrorResponse apiErrorResponse = objectMapper.readValue(
-                                e.getMessage().substring(e.getMessage().indexOf('{')), ApiErrorResponse.class);
+                            e.getMessage().substring(e.getMessage().indexOf('{')), ApiErrorResponse.class);
                         return apiErrorResponse.description();
                     } catch (JsonProcessingException ex) {
                         return "Произошла ошибка";

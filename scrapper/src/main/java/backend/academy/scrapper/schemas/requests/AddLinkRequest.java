@@ -5,4 +5,5 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import org.hibernate.validator.constraints.URL;
 
-public record AddLinkRequest(@URL @NotNull @ValidateLink String link, List<String> tags, List<String> filters) {}
+public record AddLinkRequest(@URL @NotNull @ValidateLink String link, List<String> tags, List<String> filters) {
+}

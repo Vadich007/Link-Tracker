@@ -23,11 +23,12 @@ public class ListConsumer {
 
     @KafkaHandler
     public void handleListLinksResponse(
-            @Payload ListLinksResponse response, @Header(KafkaHeaders.RECEIVED_KEY) Long chatId) {
+        @Payload ListLinksResponse response, @Header(KafkaHeaders.RECEIVED_KEY) Long chatId) {
         kafkaResponseStore.completeRequest(chatId, response);
     }
 
     @KafkaHandler
     public void handleKafkaEventRequest(
-            @Payload KafkaEventRequest response, @Header(KafkaHeaders.RECEIVED_KEY) Long chatId) {}
+        @Payload KafkaEventRequest response, @Header(KafkaHeaders.RECEIVED_KEY) Long chatId) {
+    }
 }

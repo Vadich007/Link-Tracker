@@ -26,8 +26,8 @@ public class JdbcUserRepository implements UserRepository {
     @Override
     @SneakyThrows
     public boolean contain(long chatId) {
-        ResultSet rs = JdbcUtils.execute(connection, "SELECT COUNT(*) FROM users WHERE chat_Id = ?", chatId);
-        return rs != null && rs.next() && rs.getInt(1) == 1;
+        ResultSet rs = JdbcUtils.execute(connection, "SELECT EXISTS(SELECT 1 FROM users WHERE chat_Id = ?)", chatId);
+        return rs.next() && rs.getBoolean(1);
     }
 
     @Override
@@ -63,10 +63,10 @@ public class JdbcUserRepository implements UserRepository {
     public void addUrl(long chatId, String url) {
         AddLinkRequest addLinkRequest = new AddLinkRequest(url, null, null);
         JdbcUtils.update(
-                connection,
-                "UPDATE users SET add_link_request = ? WHERE chat_Id = ?",
-                addLinkRequest.toString(),
-                chatId);
+            connection,
+            "UPDATE users SET add_link_request = ? WHERE chat_Id = ?",
+            addLinkRequest.toString(),
+            chatId);
     }
 
     @Override
@@ -79,10 +79,10 @@ public class JdbcUserRepository implements UserRepository {
             addLinkRequest.tags(tags);
 
             JdbcUtils.update(
-                    connection,
-                    "UPDATE users SET add_link_request = ? WHERE chat_Id = ?",
-                    addLinkRequest.toString(),
-                    chatId);
+                connection,
+                "UPDATE users SET add_link_request = ? WHERE chat_Id = ?",
+                addLinkRequest.toString(),
+                chatId);
         }
     }
 
@@ -95,10 +95,10 @@ public class JdbcUserRepository implements UserRepository {
             AddLinkRequest addLinkRequest = objectMapper.readValue(rawRequest, AddLinkRequest.class);
             addLinkRequest.filters(filters);
             JdbcUtils.update(
-                    connection,
-                    "UPDATE users SET add_link_request = ? WHERE chat_Id = ?",
-                    addLinkRequest.toString(),
-                    chatId);
+                connection,
+                "UPDATE users SET add_link_request = ? WHERE chat_Id = ?",
+                addLinkRequest.toString(),
+                chatId);
         }
     }
 
@@ -118,11 +118,6 @@ public class JdbcUserRepository implements UserRepository {
     @Override
     public void deleteAddLinkRequest(long chatId) {
         JdbcUtils.update(connection, "UPDATE users SET add_link_request = NULL WHERE chat_Id = ?", chatId);
-    }
-
-    @Override
-    public void clear() {
-        JdbcUtils.update(connection, "DELETE FROM users");
     }
 
     @Override

@@ -24,7 +24,5 @@ public interface UserRepository {
 
     void deleteAddLinkRequest(long chatId);
 
-    void clear();
-
     int size();
 }

@@ -30,13 +30,13 @@ public class StackOverflowService implements TrackedService<Item> {
         ResponseEntity<StackOverflowResponse> response = stackOverflowClient.sendTimelineRequest(id);
 
         if (response != null
-                && response.getBody() != null
-                && response.getBody().items() != null
-                && !response.getBody().items().isEmpty()
-                && response.getBody().items().getFirst().postId() != null) {
+            && response.getBody() != null
+            && response.getBody().items() != null
+            && !response.getBody().items().isEmpty()
+            && response.getBody().items().getFirst().postId() != null) {
 
             boolean result = !linkRepository.isLastEvent(
-                    url, response.getBody().items().getFirst().postId());
+                url, response.getBody().items().getFirst().postId());
 
             if (result)
                 linkRepository.setLastEvent(url, response.getBody().items().getFirst());
@@ -55,24 +55,24 @@ public class StackOverflowService implements TrackedService<Item> {
 
         String message;
         ResponseEntity<StackOverflowResponse> response =
-                stackOverflowClient.sendPostsRequest(String.valueOf(lastItem.postId()));
+            stackOverflowClient.sendPostsRequest(String.valueOf(lastItem.postId()));
 
         String preview = "";
         if (response != null
-                && response.hasBody()
-                && response.getBody() != null
-                && response.getBody().items() != null
-                && !response.getBody().items().isEmpty()
-                && !response.getBody().items().getFirst().body().isEmpty()) {
+            && response.hasBody()
+            && response.getBody() != null
+            && response.getBody().items() != null
+            && !response.getBody().items().isEmpty()
+            && !response.getBody().items().getFirst().body().isEmpty()) {
 
             String text = response.getBody()
-                    .items()
-                    .getFirst()
-                    .body()
-                    .replaceAll("<p>", "")
-                    .replaceAll("<code>", "")
-                    .replaceAll("</p>", "")
-                    .replaceAll("</code>", "");
+                .items()
+                .getFirst()
+                .body()
+                .replaceAll("<p>", "")
+                .replaceAll("<code>", "")
+                .replaceAll("</p>", "")
+                .replaceAll("</code>", "");
 
             preview = text.length() < 200 ? text : text.substring(0, 199);
         }
@@ -80,33 +80,33 @@ public class StackOverflowService implements TrackedService<Item> {
         switch (StackOverflowTimelineTypes.getEnum(lastItem.timelineType())) {
             case StackOverflowTimelineTypes.ANSWER:
                 message = String.format(
-                        """
+                    """
                         Новый ответ
                         %s
                         %s
                         %s
                         %s
                         %s""",
-                        label.substring(0, 1).toUpperCase(Locale.ROOT) + label.substring(1),
-                        lastItem.owner().displayName(),
-                        lastItem.creationDate(),
-                        preview,
-                        url);
+                    label.substring(0, 1).toUpperCase(Locale.ROOT) + label.substring(1),
+                    lastItem.owner().displayName(),
+                    lastItem.creationDate(),
+                    preview,
+                    url);
                 break;
             case StackOverflowTimelineTypes.COMMENT:
                 message = String.format(
-                        """
+                    """
                         Новый комментарий
                         %s
                         %s
                         %s
                         %s
                         %s""",
-                        label.substring(0, 1).toUpperCase(Locale.ROOT) + label.substring(1),
-                        lastItem.owner().displayName(),
-                        lastItem.creationDate(),
-                        preview,
-                        url);
+                    label.substring(0, 1).toUpperCase(Locale.ROOT) + label.substring(1),
+                    lastItem.owner().displayName(),
+                    lastItem.creationDate(),
+                    preview,
+                    url);
                 break;
             default:
                 message = String.format("""

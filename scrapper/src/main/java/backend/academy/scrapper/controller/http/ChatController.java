@@ -1,6 +1,7 @@
 package backend.academy.scrapper.controller.http;
 
 import backend.academy.scrapper.repository.chat.ChatRepository;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.validation.constraints.Positive;
 import java.util.NoSuchElementException;
 import lombok.AllArgsConstructor;
@@ -20,6 +21,7 @@ public class ChatController {
     private final ChatRepository repository;
 
     @PostMapping
+    @RateLimiter(name = "scrapper")
     public void addChat(@PathVariable @Positive long id) {
         if (repository.containChat(id)) throw new NoSuchElementException("Чат с таким id уже зарегистрирован");
         repository.addChat(id);

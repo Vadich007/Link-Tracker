@@ -11,9 +11,9 @@ public record Link(Long id, @URL @NotNull String url, List<String> tags, List<St
         String tags = links.subscriptions().get(0).tags();
         String filters = links.subscriptions().get(0).filters();
         return new Link(
-                links.id(),
-                links.url(),
-                tags != null ? Arrays.stream(tags.split(",")).toList() : null,
-                filters != null ? Arrays.stream(filters.split(",")).toList() : null);
+            links.id(),
+            links.url(),
+            tags != null ? Arrays.stream(tags.split(",")).toList() : null,
+            filters != null ? Arrays.stream(filters.split(",")).toList() : null);
     }
 }

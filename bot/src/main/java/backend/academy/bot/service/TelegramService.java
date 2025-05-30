@@ -21,8 +21,8 @@ public class TelegramService {
         this.messageService = messageService;
 
         SetMyCommands commands = new SetMyCommands(Arrays.stream(BotCommands.values())
-                .map(BotCommands::toTgBotCommand)
-                .toArray(BotCommand[]::new));
+            .map(BotCommands::toTgBotCommand)
+            .toArray(BotCommand[]::new));
         telegramBot.execute(commands);
 
         listenMessage();

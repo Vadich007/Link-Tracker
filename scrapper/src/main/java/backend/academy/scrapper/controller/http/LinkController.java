@@ -7,6 +7,7 @@ import backend.academy.scrapper.schemas.requests.AddLinkRequest;
 import backend.academy.scrapper.schemas.requests.RemoveLinkRequest;
 import backend.academy.scrapper.schemas.responses.bot.LinkResponse;
 import backend.academy.scrapper.schemas.responses.bot.ListLinksResponse;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -34,18 +35,19 @@ public class LinkController {
     private final LinkRepository linkRepository;
 
     @PostMapping
+    @RateLimiter(name = "scrapper")
     public LinkResponse addLink(
-            @Positive @RequestHeader("Tg-Chat-Id") long id,
-            @NotNull @RequestBody @Valid AddLinkRequest addLinkRequest) {
+        @Positive @RequestHeader("Tg-Chat-Id") long id,
+        @NotNull @RequestBody @Valid AddLinkRequest addLinkRequest) {
         if (!chatRepository.containChat(id)) {
             log.error(
-                    "Unsuccessful attempt to add a link {} from a non-existent user with an id {}",
-                    addLinkRequest.link(),
-                    id);
+                "Unsuccessful attempt to add a link {} from a non-existent user with an id {}",
+                addLinkRequest.link(),
+                id);
             throw new NoSuchElementException("Отсутствует чат с таким id");
         }
 
-        if (chatRepository.getLinks(id).stream().anyMatch(l -> l.url().equals(addLinkRequest.link()))) {
+        if (linkRepository.getLinks(id).stream().anyMatch(l -> l.url().equals(addLinkRequest.link()))) {
             log.error("Unsuccessful attempt to add a link {} user with an id {}", addLinkRequest.link(), id);
             throw new NoSuchElementException("Ссылка уже отслеживается");
         }
@@ -56,10 +58,10 @@ public class LinkController {
         }
 
         LinkResponse response = new LinkResponse(
-                linkRepository.getLinkId(addLinkRequest.link()),
-                addLinkRequest.link(),
-                addLinkRequest.tags(),
-                addLinkRequest.filters());
+            linkRepository.getLinkId(addLinkRequest.link()),
+            addLinkRequest.link(),
+            addLinkRequest.tags(),
+            addLinkRequest.filters());
 
         Link link = new Link(response.id(), addLinkRequest.link(), addLinkRequest.tags(), addLinkRequest.filters());
         chatRepository.subscribeLink(id, link);
@@ -69,6 +71,7 @@ public class LinkController {
     }
 
     @GetMapping
+    @RateLimiter(name = "scrapper")
     public ListLinksResponse getLinks(@Positive @RequestHeader("Tg-Chat-Id") long id) {
         if (!chatRepository.containChat(id)) {
             log.error("An unsuccessful attempt to get a list of links from a non-existent user with id {}", id);
@@ -77,30 +80,31 @@ public class LinkController {
 
         log.info("User with id {} requested a list of links", id);
 
-        List<Link> links = chatRepository.getLinks(id);
+        List<Link> links = linkRepository.getLinks(id);
         return new ListLinksResponse(links, links.size());
     }
 
     @DeleteMapping
+    @RateLimiter(name = "scrapper")
     public LinkResponse deleteLink(
-            @Positive @RequestHeader("Tg-Chat-Id") long id,
-            @NotNull @RequestBody @Valid RemoveLinkRequest removeLinkRequest) {
+        @Positive @RequestHeader("Tg-Chat-Id") long id,
+        @NotNull @RequestBody @Valid RemoveLinkRequest removeLinkRequest) {
         if (!chatRepository.containChat(id)) {
             log.error(
-                    "Unsuccessful attempt to delete a link {} for a non-existent user with an id {}",
-                    removeLinkRequest.link(),
-                    id);
+                "Unsuccessful attempt to delete a link {} for a non-existent user with an id {}",
+                removeLinkRequest.link(),
+                id);
             throw new NoSuchElementException("Отсутствует чат с таким id");
         }
 
-        Optional<Link> optional = chatRepository.getLinks(id).stream()
-                .filter(l -> l.url().equals(removeLinkRequest.link()))
-                .findFirst();
+        Optional<Link> optional = linkRepository.getLinks(id).stream()
+            .filter(l -> l.url().equals(removeLinkRequest.link()))
+            .findFirst();
         if (optional.isEmpty()) {
             log.error(
-                    "User with id {} try to delete link {}, which does not exist in repository",
-                    id,
-                    removeLinkRequest.link());
+                "User with id {} try to delete link {}, which does not exist in repository",
+                id,
+                removeLinkRequest.link());
             throw new IllegalArgumentException("Ссылка не найдена");
         }
 

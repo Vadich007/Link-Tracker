@@ -1,7 +1,5 @@
 package backend.academy.scrapper;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import backend.academy.scrapper.db.LiquibaseMigration;
 import backend.academy.scrapper.repository.chat.ChatRepository;
 import backend.academy.scrapper.repository.link.LinkRepository;
@@ -17,8 +15,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Set;
 import liquibase.exception.LiquibaseException;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,16 +24,20 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @Testcontainers
 public class OrmLinkRepositoryTests {
 
     private static final PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>("postgres:17-alpine")
-            .withExposedPorts(5432)
-            .withDatabaseName("local")
-            .withUsername("postgres")
-            .withPassword("test");
+        .withExposedPorts(5432)
+        .withDatabaseName("local")
+        .withUsername("postgres")
+        .withPassword("test");
 
     @Autowired
     private ChatRepository chatRepository;
@@ -54,21 +55,15 @@ public class OrmLinkRepositoryTests {
     }
 
     @BeforeEach
-    void setUp() {
-        chatRepository.clear();
-        linkRepository.clear();
-    }
-
-    @BeforeAll
-    static void beforeAll() throws SQLException, LiquibaseException {
+    void setUp() throws SQLException, LiquibaseException {
         postgresContainer.start();
         Connection connection = DriverManager.getConnection(
-                postgresContainer.getJdbcUrl(), postgresContainer.getUsername(), postgresContainer.getPassword());
+            postgresContainer.getJdbcUrl(), postgresContainer.getUsername(), postgresContainer.getPassword());
         LiquibaseMigration.migration(connection, "db/master.xml");
     }
 
-    @AfterAll
-    static void afterAll() {
+    @AfterEach
+    void afterEach() {
         postgresContainer.stop();
     }
 
@@ -124,13 +119,6 @@ public class OrmLinkRepositoryTests {
 
         Set<Long> chats = linkRepository.getChats("https://github.com/example");
         assertEquals(0, chats.size());
-    }
-
-    @Test
-    void testClear() {
-        linkRepository.addLink("https://github.com/example");
-        linkRepository.clear();
-        assertEquals(0, linkRepository.size());
     }
 
     @Test

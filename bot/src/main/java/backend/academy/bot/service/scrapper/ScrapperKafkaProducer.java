@@ -36,9 +36,9 @@ public class ScrapperKafkaProducer implements ScrapperService {
     public void registrationChat(long chatId) {
         kafkaTemplate.send(config.topic().chats(), chatId, new KafkaEventRequest("REGISTRATION"));
         log.info(
-                "Sent registration event for chatId {} in topic {}",
-                chatId,
-                config.topic().chats());
+            "Sent registration event for chatId {} in topic {}",
+            chatId,
+            config.topic().chats());
     }
 
     @SneakyThrows
@@ -50,9 +50,9 @@ public class ScrapperKafkaProducer implements ScrapperService {
         kafkaTemplate.send(config.topic().links(), chatId, request);
 
         log.info(
-                "Sent add link event for chatId {} in topic {}",
-                chatId,
-                config.topic().links());
+            "Sent add link event for chatId {} in topic {}",
+            chatId,
+            config.topic().links());
     }
 
     @SneakyThrows
@@ -64,9 +64,9 @@ public class ScrapperKafkaProducer implements ScrapperService {
         kafkaTemplate.send(config.topic().links(), chatId, request);
 
         log.info(
-                "Sent remove link event for chatId {} in topic {}",
-                chatId,
-                config.topic().links());
+            "Sent remove link event for chatId {} in topic {}",
+            chatId,
+            config.topic().links());
     }
 
     @SneakyThrows
@@ -83,9 +83,9 @@ public class ScrapperKafkaProducer implements ScrapperService {
 
         kafkaTemplate.send(config.topic().listLinks(), chatId, new KafkaEventRequest("GET_LINKS"));
         log.info(
-                "Sent list links event for chatId {} in topic {}",
-                chatId,
-                config.topic().listLinks());
+            "Sent list links event for chatId {} in topic {}",
+            chatId,
+            config.topic().listLinks());
 
         ListLinksResponse response;
         try {

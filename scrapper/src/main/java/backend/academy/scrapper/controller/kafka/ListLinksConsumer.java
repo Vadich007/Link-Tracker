@@ -1,6 +1,7 @@
 package backend.academy.scrapper.controller.kafka;
 
 import backend.academy.scrapper.repository.chat.ChatRepository;
+import backend.academy.scrapper.repository.link.LinkRepository;
 import backend.academy.scrapper.schemas.models.Link;
 import backend.academy.scrapper.schemas.requests.KafkaEventRequest;
 import backend.academy.scrapper.schemas.responses.bot.ListLinksResponse;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Component;
 @KafkaListener(topics = "${kafka.topic.list-links}")
 public class ListLinksConsumer {
     private final ChatRepository chatRepository;
+    private final LinkRepository linkRepository;
     private final KafkaBotService kafkaBotService;
 
     @KafkaHandler
@@ -36,10 +38,11 @@ public class ListLinksConsumer {
 
         log.info("User with id {} requested a list of links", id);
 
-        List<Link> links = chatRepository.getLinks(id);
+        List<Link> links = linkRepository.getLinks(id);
         kafkaBotService.getLinks(id, new ListLinksResponse(links, links.size()));
     }
 
     @KafkaHandler
-    public void listLinksListen(@Payload ListLinksResponse response, @Header(KafkaHeaders.RECEIVED_KEY) Long id) {}
+    public void listLinksListen(@Payload ListLinksResponse response, @Header(KafkaHeaders.RECEIVED_KEY) Long id) {
+    }
 }
